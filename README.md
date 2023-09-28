@@ -1,3 +1,3 @@
-<h1>Ghost - a small powerfull C2 server</h1>
+<h1>Ghost : a tiny powerful C2 server</h1>
 
-Documentation in progress
+Documentation coming soon.
