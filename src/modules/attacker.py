@@ -12,7 +12,7 @@ class Attacker:
 
     def winplant(self, server):
         random_chars = []
-        for i in range(8):
+        for i in range(6):
             random_chars.append(str(random.choice(string.ascii_letters)))
             random_chars.append(str(random.choice(string.ascii_letters)))
             random_chars.append(str(random.randint(0,9)))
@@ -40,7 +40,7 @@ class Attacker:
     
     def linplant(self, server):
         random_chars = []
-        for i in range(8):
+        for i in range(6):
             random_chars.append(str(random.choice(string.ascii_letters)))
             random_chars.append(str(random.choice(string.ascii_letters)))
             random_chars.append(str(random.randint(0,9)))

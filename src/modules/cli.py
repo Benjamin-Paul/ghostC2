@@ -38,7 +38,7 @@ class Cli:
         if command == "":
             pass
         # "listem" without arguments (help)
-        elif command == "listen":
+        elif command == "listen" or command == "listen -h" or command == "listen --help":
             print("Usage : listen [flag]")
             print("    -l           show current listener ip and port")
             print("    -s           set listener to ip and port of choice")
@@ -93,10 +93,12 @@ class Cli:
             else:
                 print("\n[-] You cannot generate a payload without an active listener.\n")
         # "sessions" without arguments (help)
-        elif command == "sessions":
+        elif command == "sessions" or command == "sessions -h" or command == "sessions --help":
             print("Usage : sessions [flag] [value]")
             print("    -l           list all sessions")
+            print("                 ('ls' is an alias for 'sessions -l')")
             print("    -i <num>     interact with session number <num>")
+            print("                 ('cd' is an alias for 'sessions -i')")
             print("")
         # "sessions -l" (and alias "ls")
         elif command == "sessions -l" or command == "ls":
@@ -149,8 +151,13 @@ class Cli:
             server.close_all_connections()
             return False
         elif command == "help":
-            print("Help is coming...\n")
-            # TODO make help output
+            print("    listen   [-s, -l. -k]   configure the listener on the server")
+            print("    sessions [-l, -i]       session handler between server and targets")
+            print("    winplant                generate a Windows reverse conncetion")
+            print("    linplant                generate a Linux reverse conncetion")
+            print("    exeplant                generate a executable reverse conncetion for Windows\n")
+            print("Enter 'exit' to close all connections and leave.")
+            print("")
         # unknown commands
         else:
             print("Unkown command. Type 'help' for a list of accepted commands.\n")

@@ -7,9 +7,9 @@ from attacker import Attacker
 
 if __name__ == "__main__":
     try:
-        server = Server()
-        attacker = Attacker()
+        communication_server = Server()
+        main_attacker = Attacker()
         interface = Cli()
-        interface.run(server, attacker)
+        interface.run(communication_server, main_attacker)
     except Exception as error:
         print(f"An error occured : {error}")
