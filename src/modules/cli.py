@@ -105,10 +105,10 @@ class Cli:
         elif command == "sessions -l" or command == "ls":
             session_counter = 1
             sessions_table = PrettyTable()
-            sessions_table.field_names = ["Session", "Target", "Username", "Admin", "Status", "Check-in time"]
+            sessions_table.field_names = ["Session", "Target", "OS", "Username", "Admin", "Status", "Check-in time"]
             sessions_table.padding_width = 3
             for target in server.list_of_targets:
-                sessions_table.add_row([session_counter, target.fullname, target.user, target.is_admin, target.status, target.time_record])
+                sessions_table.add_row([session_counter, target.fullname, target.os, target.user, target.is_admin, target.status, target.time_record])
                 session_counter += 1
             print(f"{sessions_table}\n")
         # "sessions -i <num>"

