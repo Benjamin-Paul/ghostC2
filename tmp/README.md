@@ -4,4 +4,4 @@ In patricular those payloads are created by the ``winplant``, ``linplant`` and `
 
 The payloads are stored as ``.py`` files with randomized alphanumeric names.
 
-To erase all temporary files at once, juste run the powershell script ``clean_tmp.ps1``, sotred in [a relative link](src/scripts/clean_tmp.ps1)
+To erase all temporary files at once, juste run the powershell script [/src/scripts/clean_tmp.ps1](/src/scripts/clean_tmp.ps1)
