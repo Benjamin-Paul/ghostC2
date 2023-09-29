@@ -53,11 +53,12 @@ class Cli:
                 input_port = input("[+] Enter the port to listen on : ")
                 try:
                     server.prepare_socket_thread(input_ip, input_port)
+                except Exception:
+                    print("\n[-] Values provided are not valid.\n")
+                else:
                     server.is_listening = True
                     server.host_ip = input_ip
                     server.host_port = input_port
-                except Exception:
-                    print("\n[-] Values provided are not valid.\n")
         # "listen -l" command to show what's listening
         elif command == "listen -l":
             if not server.is_listening:
@@ -107,17 +108,7 @@ class Cli:
             sessions_table.field_names = ["Session", "Target", "Username", "Admin", "Status", "Check-in time"]
             sessions_table.padding_width = 3
             for target in server.list_of_targets:
-                fullname = str(target[1])
-                if target[3] is not None:
-                    fullname = str(target[3]) + "@" + fullname
-                # list_of_targets structure : list with 
-                #                               [0]target_id 
-                #                               [1]target_ip 
-                #                               [2]time_record 
-                #                               [3]hostname 
-                #                               [4]is_admin
-                #                               [5]username
-                sessions_table.add_row([session_counter, fullname, target[5], target[4], "", target[2]])
+                sessions_table.add_row([session_counter, target.fullname, target.user, target.is_admin, target.status, target.time_record])
                 session_counter += 1
             print(f"{sessions_table}\n")
         # "sessions -i <num>"
