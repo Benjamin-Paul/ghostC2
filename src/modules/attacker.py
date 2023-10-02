@@ -10,6 +10,34 @@ class Attacker:
     def __init__(self):
         pass
 
+    def persist(self, server, target_index):
+        target = server.list_of_targets[target_index]
+        print(f"\n[+] Setting up persistence for {target.fullname}...\n")
+        if "Windows" in target.os:
+            selected_method_id = 0
+            while selected_method_id not in ["1", "2", "3"]:
+                print("Available methods :")
+                print("    1. Scheduling a task for vbs execution every five minutes.")
+                print("    2. Adding a registry key for payload execution on system startup.")
+                print("    3. Cancel.\n")
+                selected_method_id = input("Enter the number of the method you want to use : ")
+                print("")
+            if selected_method_id == "1":
+                self.persist_scheduled_task()
+            elif selected_method_id == "2":
+                self.persist_registry_key()
+            elif selected_method_id == "3":
+                print("Cancelling... \n")
+        else:
+            # TODO implement Linux peristence
+            pass
+
+    def persist_scheduled_task(self):
+        pass
+
+    def persist_registry_key(self):
+        pass
+
     def winplant(self, server):
         random_chars = []
         for i in range(6):

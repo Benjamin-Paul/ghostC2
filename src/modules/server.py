@@ -19,6 +19,7 @@ class Server:
         t1 = threading.Thread(target=self.welcome_new_connection)
         t1.start()
 
+    # TODO refuse connection if target is already connected (for persistence with frequent reconnection tries)
     def welcome_new_connection(self):
         while True:
             try:
