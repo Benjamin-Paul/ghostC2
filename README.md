@@ -2,7 +2,7 @@
 
 ### Important
 
-The project is not complete yet. It doesn't function yet, but it is under active construction.
+The project is not complete yet. It does function, but it is still under active construction.
 
 ### Documentation
 
